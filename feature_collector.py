@@ -2,11 +2,12 @@ from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import MAIN_DISPATCHER, DEAD_DISPATCHER, set_ev_cls
 from ryu.lib import hub
+from ryu.ofproto import ofproto_v1_3   # ✅ use OpenFlow 1.3
 import csv
 import time
 
 class FeatureCollector(app_manager.RyuApp):
-    OFP_VERSIONS = [1, 4]   # OpenFlow 1.4 (can change to 1.3 if needed)
+    OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]   # ✅ fixed
 
     def __init__(self, *args, **kwargs):
         super(FeatureCollector, self).__init__(*args, **kwargs)
@@ -45,7 +46,6 @@ class FeatureCollector(app_manager.RyuApp):
     def _request_stats(self, datapath):
         ofp = datapath.ofproto
         parser = datapath.ofproto_parser
-
         req = parser.OFPFlowStatsRequest(datapath)
         datapath.send_msg(req)
 
@@ -78,4 +78,4 @@ class FeatureCollector(app_manager.RyuApp):
                     packet_count, byte_count, duration,
                     packet_rate, byte_rate
                 ])
-                self.csv_file.flush()  # ensure write to disk
+                self.csv_file.flush()
